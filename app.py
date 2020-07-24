@@ -1,9 +1,15 @@
 from flask import Flask, request
 from flask_restful import Resource, Api
+from flask_jwt import JWT, jwt_required
+
+from security import authenticate, identity
 
 app = Flask(__name__)
-app.secret_key = 'secret'
+app.debug = True
+app.config['SECRET_KEY'] = 'super-secret'
+
 api = Api(app)
+jwt = JWT(app, authenticate, identity)
 
 items = [
 	{ 'name': "chair", 'price': 12.30 },
@@ -12,7 +18,7 @@ items = [
 ]
 
 class Item(Resource):
-
+	@jwt_required()
 	def get(self, name):
 		item = next(filter(lambda item: item['name'] == name, items), None)
 		return { 'item': item }, 200 if item else 404
@@ -34,4 +40,4 @@ class Items(Resource):
 api.add_resource(Item, '/item/<string:name>')
 api.add_resource(Items, '/items')
 
-app.run(port=5000, debug=True)
+app.run()
