@@ -18,7 +18,6 @@ items = [
 ]
 
 class Item(Resource):
-	@jwt_required()
 	def get(self, name):
 		item = next(filter(lambda item: item['name'] == name, items), None)
 		return { 'item': item }, 200 if item else 404
@@ -30,6 +29,25 @@ class Item(Resource):
 		data = request.get_json()
 		item = { 'name': name, 'price': data['price'] }
 		items.append(item)
+		return item, 201
+
+	@jwt_required()
+	def delete(self, name):
+		global items
+		items = list(filter(lambda item: item['name'] != name, items))
+		return { 'message': 'Item deleted' }
+		
+	@jwt_required()
+	def put(self, name):
+		data = request.get_json()
+		
+		item = next(filter(lambda item: item['name'] == name, items), None)
+		if item is None:	
+			item = { 'name': name, 'price': data['price'] }
+			items.append(item)
+		else:
+			item.update(data)
+
 		return item, 201
 
 class Items(Resource):
