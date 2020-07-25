@@ -3,6 +3,7 @@ from flask_restful import Resource, Api, reqparse
 from flask_jwt import JWT, jwt_required
 
 from security import authenticate, identity
+from user import UserRegister
 
 app = Flask(__name__)
 app.debug = True
@@ -37,7 +38,7 @@ class Item(Resource):
 		data = Item.parser.parse_args()
 		item = { 'name': name, 'price': data['price'] }
 		items.append(item)
-		
+
 		return item, 201
 
 	@jwt_required()
@@ -66,5 +67,6 @@ class Items(Resource):
 
 api.add_resource(Item, '/item/<string:name>')
 api.add_resource(Items, '/items')
+api.add_resource(UserRegister, '/register')
 
 app.run()
