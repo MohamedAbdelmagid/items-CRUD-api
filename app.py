@@ -7,6 +7,7 @@ from flask_jwt import JWT
 from security import authenticate, identity
 from resources.user import UserRegister
 from resources.item import Item, Items
+from database import db
 
 app = Flask(__name__)
 app.debug = True
@@ -14,6 +15,8 @@ app.config['SECRET_KEY'] = 'super-secret'
 
 app.config['JWT_EXPIRATION_DELTA'] = timedelta(hours=2)
 app.config['JWT_AUTH_URL_RULE'] = '/login'
+
+db.init_app(app)
 
 api = Api(app)
 jwt = JWT(app, authenticate, identity)
