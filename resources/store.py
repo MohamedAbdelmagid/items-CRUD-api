@@ -32,7 +32,7 @@ class Store(Resource):
 		if store:
 			store.delete_from_database()
 		else:
-			return 204
+			return {'message': 'Store is already deleted or not exists!'}, 204
 
 		return {'message': 'Store deleted!'}, 200
 
