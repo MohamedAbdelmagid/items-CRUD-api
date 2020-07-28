@@ -1,5 +1,3 @@
-import sqlite3
-
 from flask_restful import Resource, reqparse
 from flask_jwt import jwt_required
 
@@ -29,7 +27,7 @@ class Item(Resource):
 		data = Item.parser.parse_args()
 		item = ItemModel(name, data['price'])
 		try:
-			item.insert()
+			item.save_in_database()
 		except:
 			return { 'message': 'An error occured inserting the item.' }, 500
 
@@ -37,17 +35,9 @@ class Item(Resource):
 
 	@jwt_required()
 	def delete(self, name):
-		connection = sqlite3.connect('data.db')
-		cursor = connection.cursor()
-
-		query = "DELETE FROM items WHERE name=?"
-		cursor.execute(query, (name,))
-
-		connection.commit()
-		connection.close()
-
-		if ItemModel.find_by_name(name):
-			return { 'message': 'Item is not deleted for some reason !!'}, 500
+		item = ItemModel.find_by_name(name)
+		if item:
+			item.delete_from_database()
 
 		return {'message': 'Item deleted'}, 201
 		
@@ -56,32 +46,17 @@ class Item(Resource):
 		data = Item.parser.parse_args()
 		
 		item = ItemModel.find_by_name(name)
-		updated_item = ItemModel(name, data['price'])
-		if item is None:	
-			try:
-				updated_item.insert()
-			except:
-				return {'message': 'An error occurred inserting the item.'}, 500
+		if item is None:
+			item = ItemModel(name, data['price'])
 		else:
-			try:
-				updated_item.update()
-			except:
-				return {'message': 'An error occurred updating the item.'}, 500
+			item.price = data['price']
+
+		item.save_in_database()
 
 		return updated_item.json(), 201
 
 class Items(Resource):
 	
 	def get(self):
-		connection = sqlite3.connect('data.db')
-		cursor = connection.cursor()
-
-		query = "SELECT * FROM items"
-		result = cursor.execute(query)
-		items = []
-		for row in result:
-			items.append({'name': row[0], 'price': row[1]})
-		connection.close()
-
-		return {'items': items}
+		return {'items': [item.json() for item in ItemModel.query.all()]}
 			
