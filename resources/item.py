@@ -13,6 +13,12 @@ class Item(Resource):
 		required=True,
 		help='This field cannot be left blank!'
 	)
+	parser.add_argument(
+		'store_id',
+		type=int,
+		required=True,
+		help='Every item should have a store id!!'
+	)
 
 	def get(self, name):
 		item = ItemModel.find_by_name(name)
@@ -25,7 +31,7 @@ class Item(Resource):
 			return { 'message': "An item with name '{}' already exists.".format(name) }, 400
 		
 		data = Item.parser.parse_args()
-		item = ItemModel(name, data['price'])
+		item = ItemModel(name, data['price'], data['store_id'])	# **data
 		try:
 			item.save_in_database()
 		except:
@@ -39,7 +45,7 @@ class Item(Resource):
 		if item:
 			item.delete_from_database()
 
-		return {'message': 'Item deleted'}, 201
+		return {'message': 'Item deleted'}, 200
 		
 	@jwt_required()
 	def put(self, name):
@@ -47,7 +53,7 @@ class Item(Resource):
 		
 		item = ItemModel.find_by_name(name)
 		if item is None:
-			item = ItemModel(name, data['price'])
+			item = ItemModel(name, data['price'], data['store_id'])	# **data
 		else:
 			item.price = data['price']
 

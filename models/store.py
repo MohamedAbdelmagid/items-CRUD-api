@@ -1,20 +1,16 @@
 from database import db
 
-class ItemModel(db.Model):
+class StoreModel(db.Model):
 
-	__tablename__ = 'items'
+	__tablename__ = 'stores'
 
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(80))
-	price = db.Column(db.Float(precision=2))
 
-	store_id = db.Column(db.Integer, db.ForeignKey('stores.id'))
-	store = db.relationship('StoreModel')
+	items = db.relationship('ItemModel', lazy='dynamic')
 
-	def __init__(self, name, price, store_id):
+	def __init__(self, name):
 		self.name = name
-		self.price = price
-		self.store_id = store_id
 
 	@classmethod
 	def find_by_name(cls, name):
@@ -31,5 +27,5 @@ class ItemModel(db.Model):
 	def json(self):
 		return {
 			'name': self.name,
-			'price': self.price
+			'items': [item.json() for item in self.items.all()]
 		}
