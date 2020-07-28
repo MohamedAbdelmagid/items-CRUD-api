@@ -1,4 +1,6 @@
 from flask_restful import Resource
+from flask_jwt import jwt_required
+
 from models.store import StoreModel
 
 class Store(Resource):
