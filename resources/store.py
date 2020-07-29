@@ -7,9 +7,10 @@ class Store(Resource):
 
 	def get(self, name):
 		store = StoreModel.find_by_name(name)
-		if store:
-			return store.json()
-		return {'message': 'Store not found'}, 404
+		if not store:
+			return {'message': 'Store not found'}, 404
+
+		return store.json()
 		
 	#	Add new store to the database if not already exists
 	@jwt_required()
@@ -29,15 +30,15 @@ class Store(Resource):
 	@jwt_required()		
 	def delete(self, name):
 		store = StoreModel.find_by_name(name)
-		if store:
-			store.delete_from_database()
-		else:
+		if not store:
 			return {'message': 'Store is already deleted or not exists!'}, 204
 
+		store.delete_from_database()
+		
 		return {'message': 'Store deleted!'}, 200
 
 
 class Stores(Resource):
 	
 	def get(self):
-		return { 'stores': [store.json() for store in StoreModel.query.all()]}
+		return { 'stores': [store.json() for store in StoreModel.find_all()]}

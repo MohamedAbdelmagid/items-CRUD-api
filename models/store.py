@@ -16,6 +16,14 @@ class StoreModel(db.Model):
 	def find_by_name(cls, name):
 		return cls.query.filter_by(name=name).first()
 
+	@classmethod
+	def find_by_id(cls, id):
+		return cls.query.filter_by(id=id).first()
+
+	@classmethod
+	def find_all(cls):
+		return cls.query.all()
+
 	def save_in_database(self):
 			db.session.add(self)
 			db.session.commit()
@@ -26,6 +34,7 @@ class StoreModel(db.Model):
 
 	def json(self):
 		return {
+			'id': self.id,
 			'name': self.name,
 			'items': [item.json() for item in self.items.all()]
 		}
